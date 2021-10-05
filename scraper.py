@@ -1,9 +1,9 @@
-import requests
-from dotenv import load_dotenv
-from bs4 import BeautifulSoup, SoupStrainer
-
 import os
 from urllib.parse import urlparse, parse_qs
+
+import requests
+from bs4 import BeautifulSoup, SoupStrainer
+from dotenv import load_dotenv
 
 # Constants, environs
 load_dotenv()
