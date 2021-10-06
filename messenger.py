@@ -21,3 +21,4 @@ def send_message(subject, body, to):
     server.quit()
 
     # Messages in the format: / Subject / Body
+
