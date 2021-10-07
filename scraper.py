@@ -104,17 +104,33 @@ class WITSession(requests.Session):
 
     def get_letter(self, mail_id):
         """Get a specific letter from your inbox."""
-        
+   
+        def _recursive_content(item):
+            contents = []
+            for i in item.contents:
+                if isinstance(i, str):
+                    contents.append(i.replace("\xa0", " "))
+                else:
+                    contents.extend(_recursive_content(i))
+            return contents
+ 
+        # Letter contents inside <div class="col-xs-12 col-sm-9 col-lg-10"></div>:
         resp = self.get(WITSession.MESSAGE % mail_id)
         soup = BeautifulSoup(resp.content, "html.parser")
+        message = {}
+    
         # Get the letter's metadata.
-        header = {
+        message["header"] = {
             key.string: value.string for key, value in zip(
               soup.find_all("label", class_="col-sm-2 control-label"),
               soup.find_all("div", class_="col-sm-10 form-control-static")
             )
         }
-        return header
+        message["body"] = "\n".join(
+            "".join(_recursive_content(p)) for p in soup.find("div", class_="col-xs-12 col-sm-9 col-lg-10").find_all("p")
+        )
+
+        return message
 
     def get_classes(self):
         """Obtain a list of the current classes."""
