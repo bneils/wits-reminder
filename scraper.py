@@ -23,7 +23,7 @@ class WITSession(requests.Session):
     MAIL = URL + "/data/WITSMail?folder=inbox&page=%d"
     CLASSES = URL + "/data/ViewStudentClasses"
     ASSIGNMENTS = URL + "/data/ClassAssignments"   
-    MESSAGE = URL + "/data/ViewMessage?folder=inbox&wits_mail_id=%d"
+    MESSAGE = URL + "/data/ViewMessage?folder=inbox&wits_mail_id=%s"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -104,7 +104,17 @@ class WITSession(requests.Session):
 
     def get_letter(self, mail_id):
         """Get a specific letter from your inbox."""
-        raise NotImplementedError()
+        
+        resp = self.get(WITSession.MESSAGE % mail_id)
+        soup = BeautifulSoup(resp.content, "html.parser")
+        # Get the letter's metadata.
+        header = {
+            key.string: value.string for key, value in zip(
+              soup.find_all("label", class_="col-sm-2 control-label"),
+              soup.find_all("div", class_="col-sm-10 form-control-static")
+            )
+        }
+        return header
 
     def get_classes(self):
         """Obtain a list of the current classes."""
