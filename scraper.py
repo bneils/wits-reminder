@@ -23,7 +23,8 @@ class WITSession(requests.Session):
     MAIL = URL + "/data/WITSMail?folder=inbox&page=%d"
     CLASSES = URL + "/data/ViewStudentClasses"
     ASSIGNMENTS = URL + "/data/ClassAssignments"   
- 
+    MESSAGE = URL + "/data/ViewMessage?folder=inbox&wits_mail_id=%d"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.cookie_authenticate()
@@ -101,6 +102,10 @@ class WITSession(requests.Session):
 
         return set(mail) - set(last_read_mail)
 
+    def get_letter(self, mail_id):
+        """Get a specific letter from your inbox."""
+        raise NotImplementedError()
+
     def get_classes(self):
         """Obtain a list of the current classes."""
         resp = self.get(WITSession.CLASSES)
@@ -112,4 +117,11 @@ class WITSession(requests.Session):
         return classes
 
     def get_notes(self, class_):
-        """Obtain a list of the notes for a class""" 
+        """Obtain a list of the notes for a class"""
+        raise NotImplementedError()
+
+    def get_quarterly_grades(self):
+        """Obtain a list of grades for each class"""
+        #resp = self.get(WITSession.ASSIGNMENTS)
+        raise NotImplementedError()
+
