@@ -2,6 +2,7 @@ import os
 from math import ceil
 from urllib.parse import urlparse, parse_qs
 import json
+from typing import List, Dict, Any
 
 import requests
 import bs4
@@ -44,7 +45,7 @@ class WITSession(requests.Session):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
-	def authenticate(self, load_homepage=True):
+	def authenticate(self, load_homepage: bool = True):
 		"""Authenticates the session using SCHOOL_USER and SCHOOL_PASS environ variables"""
 		data = {
 			"username": os.getenv("SCHOOL_USER"),
@@ -60,12 +61,12 @@ class WITSession(requests.Session):
 		if load_homepage:
 			self.get(WITS.HOME)
 
-	def _save_cookies(self, fp="cookies.json"):
+	def _save_cookies(self, fp: str = "cookies.json"):
 		"""Saves the current session's cookies inside a JSON file"""
 		with open(fp, "w") as f:
 			json.dump(self.cookies.get_dict(), f)
 
-	def _load_cookies(self, fp="cookies.json"):
+	def _load_cookies(self, fp: str = "cookies.json"):
 		"""Loads the current session's cookies from a cookie file."""
 		with open(fp) as f:
 			self.cookies = requests.cookies.cookiejar_from_dict(json.load(f))
@@ -82,12 +83,12 @@ class WITSession(requests.Session):
 		except FileNotFoundError:
 			self.authenticate()
 	
-	def fetch_mail_ids(self, num=100):
+	def fetch_mail_ids(self, num: int = 100) -> List[str]:
 		"""Obtain most recent mail ids from WITSmail"""
+		if num <= 0:
+			return []
+
 		mail_ids = []
-
-		assert num > 0, "must get some mail"
-
 		for page in range(1, ceil(num / 100) + 1):
 			resp = self.get(WITS.MAIL % page)
 			# This parses the WITSmail page, then iterates through all links, filters the non-mail links, and gets the ID from each link.
@@ -100,8 +101,16 @@ class WITSession(requests.Session):
 						break
 		return mail_ids
 
-	def fetch_letter(self, mail_id):
-		"""Get a specific letter from your inbox."""
+	def fetch_letter(self, mail_id: str) -> Dict[str, Any]:
+		"""Get a specific letter from your inbox.
+		Returns a dict like:
+		"header":
+			"Received:":str,
+			"From:":str,
+			"To:":str,
+			"Subject:":str,
+		"body": str,
+		"""
 	
 		# Letter contents inside <div class="col-xs-12 col-sm-9 col-lg-10"></div>:
 		resp = self.get(WITS.MESSAGE % mail_id)
@@ -122,7 +131,7 @@ class WITSession(requests.Session):
 
 		return message
 
-	def fetch_ext_of_classes(self):
+	def fetch_ext_of_classes(self) -> List[str]:
 		"""Obtain a list of the current classes."""
 		resp = self.get(WITS.CLASSES)
 		
@@ -132,7 +141,7 @@ class WITSession(requests.Session):
 		]
 		return classes
 
-	def fetch_class_notes(self, class_url_ext):
+	def fetch_class_notes(self, class_url_ext: str) -> str:
 		"""Obtain the notes for a class given its url extension (e.g. ViewClassNotes?teacher_id=3210)"""
 		resp = self.get(WITS.URL + "/data/" + class_url_ext)
 		soup = BeautifulSoup(resp.content, "html.parser")
@@ -141,8 +150,13 @@ class WITSession(requests.Session):
 			lines.append(" ".join(_recursively_unfold_content(ptag)))
 		return "\n".join(lines)
 	
-	def fetch_class_grades(self, class_url_ext):
-		"""Obtain a list of grades"""
+	def fetch_class_grades(self, class_url_ext: str) -> str:
+		"""
+		Obtain a list of grades
+		Returns dict with keys: mp1, mp2, etc.
+		Those keys have a list of grades, represented as dicts with keys:
+		Assignment, Assignment Upload, Category, Date, Max Score, Scale, Score
+		"""
 		args = parse_qs(class_url_ext)
 		resp = self.get(WITS.URL + "/data/" + class_url_ext + "&tab=grades")
 		soup = BeautifulSoup(resp.content, "html.parser")

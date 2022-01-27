@@ -6,3 +6,5 @@ To get this to work, you need to enable 2FA in your Google Account and go to Con
 SCHOOL_EMAIL, SCHOOL_PASS, EMAIL_FROM, EMAIL_APP_PASS, and EMAIL_SMS_TO
 
 According to https://www.digitaltrends.com/mobile/how-to-send-a-text-from-your-email-account/, you can find your sms email gateway to send messages. 
+
+Fire this script off at regular intervals (perhaps every 5 minutes) in something like systemd or crontab.
