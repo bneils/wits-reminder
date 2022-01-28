@@ -1,20 +1,23 @@
 from difflib import ndiff
 import json
 import atexit
+from pathlib import Path
 
 # This module records information it receives, and retrieves old information.
 # It also returns the deltas of lines it sees
 
 # storage.json is loaded, modified a lot, and then saved.
 
+path = Path(__file__)
+
 try:
-	with open("storage.json") as f:
+	with path.with_name("storage.json").open("r") as f:
 		_class_information = json.load(f)
 except json.JSONDecodeError:
 	_class_information = {}
 except FileNotFoundError:
 	_class_information = {}
-	with open("storage.json", "w") as f:
+	with path.with_name("storage.json").open("w") as f:
 		f.write("{}")
 
 
@@ -29,7 +32,7 @@ def record_updated_contents(name, lines):
 	return deltas
 
 def _write_records():
-	with open("storage.json", "w") as f:
+	with path.with_name("storage.json").open("w") as f:
 		json.dump(_class_information, f)
 
 if __name__ != "__main__":

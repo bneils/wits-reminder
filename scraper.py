@@ -2,12 +2,15 @@ import os
 from math import ceil
 from urllib.parse import urlparse, parse_qs
 import json
+from pathlib import Path
 from typing import List, Dict, Any
 
 import requests
 import bs4
 from bs4 import BeautifulSoup, SoupStrainer
 from dotenv import load_dotenv
+
+path = Path(__file__)
 
 # Constants, environs
 load_dotenv()
@@ -63,12 +66,12 @@ class WITSession(requests.Session):
 
 	def _save_cookies(self, fp: str = "cookies.json"):
 		"""Saves the current session's cookies inside a JSON file"""
-		with open(fp, "w") as f:
+		with path.with_name(fp).open("w") as f:
 			json.dump(self.cookies.get_dict(), f)
 
 	def _load_cookies(self, fp: str = "cookies.json"):
 		"""Loads the current session's cookies from a cookie file."""
-		with open(fp) as f:
+		with path.with_name(fp).open("r") as f:
 			self.cookies = requests.cookies.cookiejar_from_dict(json.load(f))
 
 	def cookie_authenticate(self):
