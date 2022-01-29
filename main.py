@@ -31,7 +31,7 @@ def main():
 		message_body = []
 		for delta in deltas:
 			grade = loads(delta[2:])
-			score = grade["Score"] if not grade["Assignment Upload"].strip() else "U"
+			score = grade["Score"] if not grade.get("Assignment Upload", " ").strip() else "U"
 			message_body.append(f"{delta[0]} {grade['Assignment']} ({score}/{grade['Max Score']})")
 		
 		if message_body:
