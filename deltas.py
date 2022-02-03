@@ -1,6 +1,5 @@
 from difflib import ndiff
 import json
-import atexit
 from pathlib import Path
 
 # This module records information it receives, and retrieves old information.
@@ -20,7 +19,6 @@ except FileNotFoundError:
 	with path.with_name("storage.json").open("w") as f:
 		f.write("{}")
 
-
 def record_updated_contents(name, lines):
 	"""Enters the name:lines into the dict and returns the deltas"""
 	if name in _class_information:
@@ -31,9 +29,6 @@ def record_updated_contents(name, lines):
 	_class_information[name] = lines
 	return deltas
 
-def _write_records():
+def write_records():
 	with path.with_name("storage.json").open("w") as f:
 		json.dump(_class_information, f)
-
-if __name__ != "__main__":
-	atexit.register(_write_records)

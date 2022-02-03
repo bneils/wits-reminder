@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from scraper import WITSession
 from messenger import send_message
-from deltas import record_updated_contents
+from deltas import record_updated_contents, write_records
 
 from urllib.parse import parse_qs
 from json import dumps, loads
@@ -72,6 +72,8 @@ def main():
 			"\n\n" + letter["header"]["Subject:"] + "\n\nFrom: " + letter["header"]["From:"] + "\n\n" + body[:100] + ("..." if len(body) > 100 else ""),
 			getenv("EMAIL_SMS_TO"),
 		)
+
+	write_records()
 
 if __name__ == "__main__":
 	main()
