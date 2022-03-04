@@ -8,12 +8,12 @@ from typing import List, Dict, Any
 import requests
 import bs4
 from bs4 import BeautifulSoup, SoupStrainer
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 path = Path(__file__)
 
 # Constants, environs
-load_dotenv()
+load_dotenv(find_dotenv())
 
 def replace_nonbreaking_spaces(s):
 	return s.replace("\xa0", " ")
