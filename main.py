@@ -31,7 +31,7 @@ def main():
 		message_body = []
 		for delta in deltas:
 			grade = loads(delta[2:])
-			score = grade["Score"] if not grade.get("Assignment Upload", " ").strip() else "U"
+			score = grade.get("Score", "") if not grade.get("Assignment Upload", "").strip() else "U"
 			message_body.append(f"{delta[0]} {grade['Assignment']} ({score}/{grade['Max Score']})")
 		
 		if message_body:
@@ -69,7 +69,7 @@ def main():
 
 		send_message(
 			"New WITSmail",
-			"\n\n" + letter["header"]["Subject:"] + "\n\nFrom: " + letter["header"]["From:"] + "\n\n" + body[:100] + ("..." if len(body) > 100 else ""),
+			"\n\n" + letter["header"].get("Subject:", "No Subject") + "\n\nFrom: " + letter["header"].get("From:", "Anonymous") + "\n\n" + body[:128] + ("..." if len(body) > 128 else ""),
 			getenv("EMAIL_SMS_TO"),
 		)
 
@@ -77,3 +77,4 @@ def main():
 
 if __name__ == "__main__":
 	main()
+

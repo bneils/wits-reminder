@@ -15,14 +15,13 @@ path = Path(__file__)
 # Constants, environs
 load_dotenv(find_dotenv())
 
-def replace_nonbreaking_spaces(s):
-	return s.replace("\xa0", " ")
+NON_BREAKING_SPACE = "\xa0"
 
 def _recursively_unfold_content(el):
 	contents = []
 	for child in el.contents:
 		if isinstance(child, str):
-			contents.append(child.replace("\xa0", " ").strip())
+			contents.append(child.replace(NON_BREAKING_SPACE, " ").strip())
 		else:
 			contents.extend(_recursively_unfold_content(child))
 	return contents
@@ -149,7 +148,10 @@ class WITSession(requests.Session):
 		resp = self.get(WITS.URL + "/data/" + class_url_ext)
 		soup = BeautifulSoup(resp.content, "html.parser")
 		lines = []
-		for ptag in soup.find(id="content-bounding-box").find_all("p"):
+		box_element = soup.find(id="content-bounding-box")
+		if box_element is None:
+			return ""
+		for ptag in box_element.find_all("p"):
 			lines.append(" ".join(_recursively_unfold_content(ptag)))
 		return "\n".join(lines)
 	
@@ -175,9 +177,9 @@ class WITSession(requests.Session):
 				# Not all of the tags are of Tag, some are NavigableString
 				if isinstance(tag, bs4.element.Tag):
 					rows = tag.find_all("tr")
-					col_names = [replace_nonbreaking_spaces(col.text) for col in rows[0].find_all("td")]
+					col_names = [col.text.replace(NON_BREAKING_SPACE, " ") for col in rows[0].find_all("td")]
 					for row in rows[1:]:
-						columns = [replace_nonbreaking_spaces(col.text) for col in row.find_all("td")]
+						columns = [col.text.replace(NON_BREAKING_SPACE, " ") for col in row.find_all("td")]
 						grade = {name:col for name, col in zip(col_names, columns)}
 						marking_period_grades.append(grade)
 			grades[f"mp{mp}"] = marking_period_grades
