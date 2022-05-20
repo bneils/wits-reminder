@@ -1,3 +1,6 @@
+# Warning
+This project is deprecated. I don't use WITS anymore and the error-handling and messaging is buggy. If you want to revive this project, I would fork it and change it to use something like Signal or Telegram. This may spam your phone number otherwise.
+
 # wits-reminder
 Tells me when I get new WITSmail, when grades are uploaded, and possibly even when teacher pages get changed.
 
